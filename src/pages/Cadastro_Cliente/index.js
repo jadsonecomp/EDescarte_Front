@@ -33,6 +33,8 @@ import Toolbar from '@material-ui/core/Toolbar';
 import AssignmentInd from '@material-ui/icons/AssignmentInd';
 import Link from "@material-ui/core/Link";
 
+import { useForm } from "react-hook-form";
+
 
 /*Images*/
 import ReciclageImage from '../../assets/images/reciclagem-lixo-eletronico-02.jpg'
@@ -124,6 +126,7 @@ export default function Cadastro_Cliente() {
   const [open, setOpen] = useState(false);
   const [severityMessage, setSeverityMessage] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
+
 
   useEffect(() => {
     if (login.trim() && senha.trim() && nome.trim() && documento.trim() && email.trim() && pais.trim() && estado.trim() && cidade.trim() && bairro.trim() && rua.trim() && numero.trim() && cep.trim() ) {

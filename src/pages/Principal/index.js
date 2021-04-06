@@ -72,7 +72,7 @@ export default function Album() {
                 Login
               </Typography>  
             </Link>
-            <Link  color="inherit" href="/cadastro_cliente" >
+            <Link  color="inherit" href="/cadastro" >
               <Typography variant="h6" color="inherit" className={classes.title} >
                 Cadastro
               </Typography>  

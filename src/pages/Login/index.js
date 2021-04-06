@@ -25,6 +25,7 @@ import MuiAlert from '@material-ui/lab/Alert';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import AssignmentInd from '@material-ui/icons/AssignmentInd';
+import { useForm } from "react-hook-form";
 
 /*Images*/
 import ReciclageImage from '../../assets/images/reciclagem-lixo-eletronico-02.jpg'
@@ -99,6 +100,8 @@ export default function Login() {
   const [open, setOpen] = useState(false);
   const [severityMessage, setSeverityMessage] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
+
+  const { register, handleSubmit, errors } = useForm();
 
   useEffect(() => {
     if (login.trim() && senha.trim()) {
@@ -215,7 +218,7 @@ export default function Login() {
                         <AccountCircleIcon fontSize="large" className={classes.icone}/>
                     </InputAdornment>
                     ),
-                }}
+                  }}
               />
               <TextField
                   variant="outlined"
