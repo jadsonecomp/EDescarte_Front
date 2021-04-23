@@ -100,6 +100,7 @@ export default function Cadastro_Cliente() {
   const classes = useStyles(); //estilos do Material-UI
   const history = useHistory(); //redirecionar a página
   const [nome, setNome] = useState("");
+  const [nome_fantasia, setNomeFantasia] = useState("");
   const [documento, setDocumento] = useState("");
   const [telefone, setTelefone] = useState("");
   const [celular, setCelular] = useState("");
@@ -127,7 +128,7 @@ export default function Cadastro_Cliente() {
 
 
   useEffect(() => {
-    if (login.trim() && senha.trim() && nome.trim() && documento.trim() && email.trim() && pais.trim() && estado.trim() && cidade.trim() && bairro.trim() && rua.trim() && numero.trim() && cep.trim() ) {
+    if (login.trim() && senha.trim() && nome.trim() && documento.trim() && email.trim() && pais.trim() && estado.trim() && cidade.trim() && bairro.trim() && rua.trim() && numero.trim() && cep.trim() && nome_fantasia.trim() ) {
       setBotaoDesabilitado(false);
     } else {
       setBotaoDesabilitado(true);
@@ -138,7 +139,7 @@ export default function Cadastro_Cliente() {
         setBuscaCep(false);
     }
 
-  }, [login, senha, nome, documento, email, cep, pais, estado, cidade, bairro, rua, numero, cep]);
+  }, [login, senha, nome, documento, email, cep, pais, estado, cidade, bairro, rua, numero, cep, nome_fantasia]);
 
   // Nota: O array [] deps vazio significa
   // que este useEffect será executado uma vez
@@ -155,6 +156,7 @@ export default function Cadastro_Cliente() {
         const id_cliente = response.data.id;
         
         try {
+            const responseEmpresa = await api.post("/ponto_coleta", { nome_fantasia, id_cliente})
             const responseEnd = await api.post("/endereco", { pais, estado, cidade, bairro, rua, numero, cep, id_cliente });
             loginUsuario("", login);
 
@@ -287,6 +289,31 @@ export default function Cadastro_Cliente() {
                             }}
                         />
                         <TextField
+                            className={classes.rowEspace}
+                            variant="outlined"
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="nome_fantasia"
+                            label="Nome Fantasia"
+                            name="nome_fantasia"
+                            autoComplete="nome_fantasia"
+                            value={nome_fantasia}
+                            onChange={e => setNomeFantasia(e.target.value)}
+                            error={error}
+                            InputProps={{
+                                startAdornment: (
+                                <InputAdornment position="start">
+                                    {/* <AccountCircleIcon fontSize="large" style={{ color: "green" }}/> */}
+                                    <AccountCircleIcon fontSize="large" className={classes.icone}/>
+                                </InputAdornment>
+                                ),
+                            }}
+                        />
+                    </div>
+
+                    <div className={classes.divForm}>  
+                        <TextField
                             variant="outlined"
                             margin="normal"
                             required
@@ -306,7 +333,30 @@ export default function Cadastro_Cliente() {
                                 ),
                             }}
                         />
-                    </div>
+                        <TextField
+                            className={classes.rowEspace}
+                            variant="outlined"
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="email"
+                            label="E-mail do Usuário"
+                            type="email"
+                            name="email"
+                            autoComplete="email"
+                            value={email}
+                            onChange={e => setEmail(e.target.value)}
+                            error={error}
+                            InputProps={{
+                                startAdornment: (
+                                <InputAdornment position="start">
+                                    <MailOutlineIcon fontSize="large" className={classes.icone}/>
+                                </InputAdornment>
+                                ),
+                            }}
+                        />
+                    </div>        
+
                     <div className={classes.divForm}>
                         <TextField
                             className={classes.rowEspace}
@@ -350,30 +400,9 @@ export default function Cadastro_Cliente() {
                             }}
                         />
                     </div>
-                    <div className={classes.divForm}>        
-                        <TextField
-                            className={classes.rowEspace}
-                            variant="outlined"
-                            margin="normal"
-                            required
-                            fullWidth
-                            id="email"
-                            label="E-mail do Usuário"
-                            type="email"
-                            name="email"
-                            autoComplete="email"
-                            value={email}
-                            onChange={e => setEmail(e.target.value)}
-                            error={error}
-                            InputProps={{
-                                startAdornment: (
-                                <InputAdornment position="start">
-                                    <MailOutlineIcon fontSize="large" className={classes.icone}/>
-                                </InputAdornment>
-                                ),
-                            }}
-                        />
-                        <TextField
+                    
+                    <div className={classes.divForm}>
+                    <TextField
                             variant="outlined"
                             margin="normal"
                             required
@@ -393,28 +422,28 @@ export default function Cadastro_Cliente() {
                                 ),
                             }}
                         />
+                        <TextField
+                            variant="outlined"
+                            margin="normal"
+                            required
+                            fullWidth
+                            name="password"
+                            label="Senha"
+                            type="password"
+                            id="password"
+                            autoComplete="current-password"
+                            value={senha}
+                            onChange={e => setSenha(e.target.value)}
+                            error={error}
+                            InputProps={{
+                                startAdornment: (
+                                <InputAdornment position="start">
+                                    <LockIcon fontSize="large" className={classes.icone}/>
+                                </InputAdornment>
+                                ),
+                            }}
+                        />
                     </div>
-                    <TextField
-                        variant="outlined"
-                        margin="normal"
-                        required
-                        fullWidth
-                        name="password"
-                        label="Senha"
-                        type="password"
-                        id="password"
-                        autoComplete="current-password"
-                        value={senha}
-                        onChange={e => setSenha(e.target.value)}
-                        error={error}
-                        InputProps={{
-                            startAdornment: (
-                            <InputAdornment position="start">
-                                <LockIcon fontSize="large" className={classes.icone}/>
-                            </InputAdornment>
-                            ),
-                        }}
-                    />
                     <Typography component="h4">
                         Dados de Endereço
                     </Typography>

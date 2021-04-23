@@ -34,6 +34,9 @@ import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import LockIcon from '@material-ui/icons/Lock';
 
 
+import { useForm, Controller } from 'react-hook-form';
+
+
 const loginUsuario = login
 
 function Alert(props) {
@@ -100,13 +103,37 @@ export default function Login() {
   const [severityMessage, setSeverityMessage] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
 
+  const { register, handleSubmit, control, errors } = useForm({
+    mode: 'onChange',
+    reValidateMode: 'onChange',
+    defaultValues: {
+      login: '',
+      senha: '',
+    //   remember: true,
+    },
+  });
+
 
   useEffect(() => {
-    if (login.trim() && senha.trim()) {
+    console.log('errorslogin: ', !!errors.login)
+    console.log('errors.senha: ', !!errors.senha)
+    console.log('login: ', login)
+    console.log('senha: ', senha)
+
+
+
+    if (login.trim() && senha.trim()) { 
       setBotaoDesabilitado(false);
+    } else if((!!errors.login || !!errors.senha)) {
+        console.log('errorslogin2: ', !!errors.login)
+        console.log('errors.senha2: ', !!errors.senha)
+        setBotaoDesabilitado(false);
     } else {
+        console.log('errorslogin3: ', !!errors.login)
+        console.log('errors.senha3: ', !!errors.senha)
       setBotaoDesabilitado(true);
     }
+
   }, [login, senha]);
 
   // Nota: O array [] deps vazio significa
@@ -143,7 +170,6 @@ export default function Login() {
         setSeverityMessage("success");
         setAlertMessage("Login Realizado com Sucesso!")
         setOpen(true);
-        history.push("/area_cliente");
     } catch (err) {
         setError(true);
         setHelperText("O usuário ou a senha informados são inválidos!");
@@ -209,7 +235,7 @@ export default function Login() {
                   autoFocus
                   value={login}
                   onChange={e => setLogin(e.target.value)}
-                  error={error}
+                //   error={error}
                   InputProps={{
                     startAdornment: (
                     <InputAdornment position="start">
@@ -217,6 +243,18 @@ export default function Login() {
                     </InputAdornment>
                     ),
                   }}
+                  inputRef={register({
+                    required: 'Informe seu login.',
+                    maxLength: {
+                      value: 20,
+                      message: 'Por favor, informe seu login',
+                    },
+                    // minLength: {
+                    //     value: 1,
+                    //     message: 'Por favor, informe seu login',
+                    //   },
+                  })}
+                  error={!!errors.login}
               />
               <TextField
                   variant="outlined"
@@ -230,7 +268,7 @@ export default function Login() {
                   autoComplete="current-password"
                   value={senha}
                   onChange={e => setSenha(e.target.value)}
-                  error={error}
+                //   error={error}
                   helperText={helperText}
                   InputProps={{
                     startAdornment: (
@@ -239,6 +277,14 @@ export default function Login() {
                       </InputAdornment>
                     ),
                   }}
+                  inputRef={register({
+                    required: 'Informe sua senha.',
+                    maxLength: {
+                      value: 100,
+                      message: 'Por favor, informe sua senha',
+                    },
+                  })}
+                  error={!!errors.senha}
               />
               <FormControlLabel
                   control={
@@ -257,6 +303,7 @@ export default function Login() {
                   color="primary"
                   disabled={botaoDesabilitado}
                   className={classes.submit}
+                  error={error}
               >
                   <LockOutlinedIcon /> Acessar
               </Button>
