@@ -5,6 +5,8 @@ import { createMuiTheme, responsiveFontSizes, MuiThemeProvider } from '@material
 import green from '@material-ui/core/colors/green';
 import lightGreen from '@material-ui/core/colors/lightGreen';
 
+import './App.css';
+
 let theme = createMuiTheme(
   {
     palette: {
@@ -21,6 +23,7 @@ function App() {
     <MuiThemeProvider theme={theme}>
       <Routes />;
     </MuiThemeProvider>
+
   )
 }
 

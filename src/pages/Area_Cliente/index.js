@@ -71,9 +71,9 @@ export default function Album() {
                 Lixo Eletrônico
               </Typography>  
             </Link>
-            <Link  color="inherit" href="/empresa_coleta" >
+            <Link  color="inherit" href="/local_descarte" >
               <Typography variant="h6" color="inherit" className={classes.title} >
-                Empresas de Coleta
+                Locais de Descarte
               </Typography>  
             </Link>
             <Link  color="inherit" href="/" >
