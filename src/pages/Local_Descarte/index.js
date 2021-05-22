@@ -101,7 +101,8 @@ export default function LocalDescarte() {
   const [ativado, setAtivado] = useState(true);
   const [listaMaterialReciclado, setListaMaterialReciclado] = useState([]);
   const [valorSelecao, setValorSelecao] = useState(null);
-  // const [zoom, setZoom] = useState(15);
+  const [loadMapa, setLoadMapa] = useState(false);
+  const [zoom, setZoom] = useState(15);
   
 
   useEffect( () => {
@@ -128,7 +129,7 @@ export default function LocalDescarte() {
                 email: `E-mail: ${responseCliente.data[0].email}`
               }]);  
             }else{
-              // setZoom(13);
+              setZoom(13);
             }
             // positionsMap.push({
             //   index: responseCliente.data[0].id,
@@ -176,9 +177,19 @@ export default function LocalDescarte() {
       }    
 
     
-  }, [position, ativado, listaMaterialReciclado, positionsMap, center]);
+  }, [position, ativado, listaMaterialReciclado, center]);
 
-
+  useEffect( () => {
+    if(loadMapa){
+      console.log("Vim aqui hahahaha");
+      if(positionsMap && positionsMap.length > 1){
+        console.log("Vim aqui2 hahahaha");
+        setLoadMapa(false);
+      }else{
+        setLoadMapa(true);  
+      }
+    }
+  }, [positionsMap, loadMapa]);
   
   const handleClickButton = async (e) => {
 
@@ -186,72 +197,84 @@ export default function LocalDescarte() {
       
       
             
-      for (var i = 0; i < positionsMap.length - 1; i++) {
-        positionsMap.pop();
-      }
+      // for (var i = 0; i < positionsMap.length - 1; i++) {
+      //   positionsMap.pop();
+      // }
+
+      // console.log("positionsMapPop: ", positionsMap); 
         
       
 
       try {
+
+        let positionsMapConsultaAtual = [];
+        positionsMapConsultaAtual.push(positionsMap[0]);
+        console.log("positionsMapConsultaAtual_inicial: ", positionsMapConsultaAtual);
+
         const requestePontosMaterial = await api.get(`/ponto_material_reciclado/${valorSelecao.id}`);                    
         const pontosMaterial = requestePontosMaterial.data;
 
         console.log("pontosMaterialzzzzzzzzzzzzzz: ", pontosMaterial);
         
 
-        const dadosPontosColeta = await pontosMaterial.map(async (pontoMaterial, index) => {
+        const getDadosPontosColeta =  async (e) => {
+        
+          const retornaDadosColeta = await pontosMaterial.map(async (pontoMaterial, index) => {
 
-          const pontoColeta = await api.get(`/ponto_coleta/${pontoMaterial.id_ponto_coleta}`); 
-          
-          const cliente = await api.get(`/cliente/${pontoColeta.data[0].id_cliente}`); 
-          
-          const enderecosFinal = await api.get(`/endereco_cliente/${pontoColeta.data[0].id_cliente}`); 
-          
+              const pontoColeta = await api.get(`/ponto_coleta/${pontoMaterial.id_ponto_coleta}`); 
+              
+              const cliente = await api.get(`/cliente/${pontoColeta.data[0].id_cliente}`); 
+              
+              const enderecosFinal = await api.get(`/endereco_cliente/${pontoColeta.data[0].id_cliente}`); 
+              
 
-          const dadosRetorno = {
-            index: cliente.data[0].id + parseFloat(enderecosFinal.data[0].latitude) + pontoColeta.data[0].nome_fantasia.length,
-            latitude: parseFloat(enderecosFinal.data[0].latitude),
-            longitude: parseFloat(enderecosFinal.data[0].longitude),
-            nome: `${pontoColeta.data[0].nome_fantasia}`,
-            rua: `Endereço: ${enderecosFinal.data[0].rua}, número ${enderecosFinal.data[0].numero}`,
-            bairro: `Bairro: ${enderecosFinal.data[0].bairro}`,
-            telefone: `Telefone: ${cliente.data[0].telefone}`,
-            email: `E-mail: ${cliente.data[0].email}`
-          };
+              const dadosRetorno = {
+                index: index + cliente.data[0].id + parseFloat(enderecosFinal.data[0].latitude) + pontoColeta.data[0].nome_fantasia.length,
+                latitude: parseFloat(enderecosFinal.data[0].latitude),
+                longitude: parseFloat(enderecosFinal.data[0].longitude),
+                nome: `${pontoColeta.data[0].nome_fantasia}`,
+                rua: `Endereço: ${enderecosFinal.data[0].rua}, número ${enderecosFinal.data[0].numero}`,
+                bairro: `Bairro: ${enderecosFinal.data[0].bairro}`,
+                telefone: `Telefone: ${cliente.data[0].telefone}`,
+                email: `E-mail: ${cliente.data[0].email}`
+              };
 
-          // if(index == 0){
+              if(index == 0){
+                for (var i = 0; i < positionsMap.length - 1; i++) {
+                  positionsMap.pop();
+                }
+              }
+              
+              // positionsMap.push(dadosRetorno);
+
+              positionsMapConsultaAtual.push(dadosRetorno);
+                
+
+              return await dadosRetorno;
+
             
-          //   for (var i = 0; i < positionsMap.length - 2; i++) {
-          //     positionsMap.pop();
-          //   }
-            
-          // }
+          });
 
-          // setPositionsMap([...positionsMap, dadosRetorno]); 
-          positionsMap.push(dadosRetorno);
-            
+          console.log("retornaDadosColeta: ", retornaDadosColeta);
 
-          return dadosRetorno;
+        }
 
-        });
+        await getDadosPontosColeta();
 
-        // setCenter([positionsMap[0].latitude, positionsMap[0].longitude]);
-        // setPosition([positionsMap[0].latitude, positionsMap[0].longitude]);
+        console.log("positionsMapConsultaAtual_final: ", positionsMapConsultaAtual);
 
+        setPositionsMap(positionsMapConsultaAtual);
+
+        console.log("positionsMapMedio: ", positionsMap);
         
         setPosition(null);
-        setCenter(null);
+        setCenter([-12, -38]);
         setAtivado(true);
 
-        
-
-        // setPositionsMap([...positionsMap]);
-
-
-        // setPositionsMap([...positionsMap, dadosPontosColeta]); 
-        // setPositionsMap(positionsMap);  
+        setLoadMapa(true);
         
         console.log("positionsMapFinal: ", positionsMap); 
+
       } catch (error) {
           console.log("error: ", error);
       } 
@@ -346,8 +369,8 @@ export default function LocalDescarte() {
                 <MapContainer 
                     class="leaflet-container" 
                     center={center} 
-                    // zoom={zoom} 
-                    zoom={15} 
+                    zoom={zoom} 
+                    // zoom={15} 
                     scrollWheelZoom={true} 
                     className={classes.mapa}
                     // style={{ width: '50%', height: '50vh' }}
@@ -358,17 +381,23 @@ export default function LocalDescarte() {
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
                     {(positionsMap.length > 0) && positionsMap.map((positionMap, index) => (
-                      
+
                       positionMap && (<Marker
-                        key={index}
+                        key={positionMap.index}
                         position={[positionMap.latitude, positionMap.longitude]}
                       >
                         <Popup>
+                          
                           {positionMap.nome}
                           <br />
                           {positionMap.rua}
                           <br />
                           {positionMap.bairro}
+                          <br />
+                          {positionMap.telefone}
+                          <br />
+                          {positionMap.email}
+                          
                         </Popup>  
                       </Marker>)
 
