@@ -17,6 +17,9 @@ import { getLogin } from "../../services/auth";
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
 import { Icon } from "leaflet";
 import '../../App.css';
+import { 
+  toLatLon, distanceTo, insideCircle, insidePolygon 
+} from 'geolocation-utils'
 
 /* ícones */
 import AssignmentInd from '@material-ui/icons/AssignmentInd';
@@ -113,10 +116,6 @@ export default function LocalDescarte() {
             const responseCliente = await api.get(`/cliente_login/${getLogin()}`);         
             const responseEndereco = await api.get(`/endereco_cliente/${responseCliente.data[0].id}`);     
             
-            console.log("position: ", position);
-            console.log("center: ", center);
-            console.log("positionsMap1111: ", positionsMap);
-
             if(positionsMap.length < 1){
               setPositionsMap([...positionsMap, {
                 index: responseCliente.data[0].id + parseFloat(responseEndereco.data[0].latitude) + responseCliente.data[0].nome.length,
@@ -126,20 +125,13 @@ export default function LocalDescarte() {
                 rua: `Endereço: ${responseEndereco.data[0].rua}, número ${responseEndereco.data[0].numero}`,
                 bairro: `Bairro: ${responseEndereco.data[0].bairro}`,
                 telefone: `Telefone: ${responseCliente.data[0].telefone}`,
-                email: `E-mail: ${responseCliente.data[0].email}`
+                email: `E-mail: ${responseCliente.data[0].email}`,
+                distancia: `Local do Cliente`
               }]);  
             }else{
               setZoom(13);
             }
-            // positionsMap.push({
-            //   index: responseCliente.data[0].id,
-            //   latitude: parseFloat(responseEndereco.data[0].latitude),
-            //   longitude: parseFloat(responseEndereco.data[0].longitude),
-            //   nome: responseCliente.data[0].nome 
-            // });  
-            console.log("positionsMap22222: ", positionsMap);  
-
-            //positionCordenada = [parseFloat(responseEndereco.data[0].latitude), parseFloat(responseEndereco.data[0].longitude)]; 
+              
             setCenter([parseFloat(responseEndereco.data[0].latitude), parseFloat(responseEndereco.data[0].longitude)]);
             setPosition([parseFloat(responseEndereco.data[0].latitude), parseFloat(responseEndereco.data[0].longitude)]);
                              
@@ -164,7 +156,6 @@ export default function LocalDescarte() {
       }
 
       if(ativado){
-        console.log("passou ativado");
         setLatitudeLongitudeInicial();
         setMateriaisReciclado();
 
@@ -172,18 +163,14 @@ export default function LocalDescarte() {
           setAtivado(false)
         }
 
-      } else{
-        console.log("passou desativado");  
-      }    
-
+      } 
     
   }, [position, ativado, listaMaterialReciclado, center]);
 
   useEffect( () => {
     if(loadMapa){
-      console.log("Vim aqui hahahaha");
+      
       if(positionsMap && positionsMap.length > 1){
-        console.log("Vim aqui2 hahahaha");
         setLoadMapa(false);
       }else{
         setLoadMapa(true);  
@@ -195,27 +182,18 @@ export default function LocalDescarte() {
 
     if(valorSelecao){
       
-      
-            
-      // for (var i = 0; i < positionsMap.length - 1; i++) {
-      //   positionsMap.pop();
-      // }
-
-      // console.log("positionsMapPop: ", positionsMap); 
-        
-      
-
       try {
 
         let positionsMapConsultaAtual = [];
         positionsMapConsultaAtual.push(positionsMap[0]);
-        console.log("positionsMapConsultaAtual_inicial: ", positionsMapConsultaAtual);
+
+        const positionCliente = toLatLon([positionsMapConsultaAtual[0].longitude, positionsMapConsultaAtual[0].latitude]);
+        
+        const raio = 10000; // metros
 
         const requestePontosMaterial = await api.get(`/ponto_material_reciclado/${valorSelecao.id}`);                    
         const pontosMaterial = requestePontosMaterial.data;
 
-        console.log("pontosMaterialzzzzzzzzzzzzzz: ", pontosMaterial);
-        
 
         const getDadosPontosColeta =  async (e) => {
         
@@ -227,7 +205,13 @@ export default function LocalDescarte() {
               
               const enderecosFinal = await api.get(`/endereco_cliente/${pontoColeta.data[0].id_cliente}`); 
               
+              let positionEmpresa = toLatLon([parseFloat(enderecosFinal.data[0].longitude), parseFloat(enderecosFinal.data[0].latitude)]);
 
+              let distancia = (distanceTo(positionCliente, positionEmpresa) / 1000); //distância em quilômetros
+              distancia = parseFloat(distancia.toFixed(2));
+
+              let pertenceRaioDistancia = insideCircle(positionEmpresa, positionCliente, raio); //a ideia eh verificar se uma empresa está em um raio de distância do cliente
+              
               const dadosRetorno = {
                 index: index + cliente.data[0].id + parseFloat(enderecosFinal.data[0].latitude) + pontoColeta.data[0].nome_fantasia.length,
                 latitude: parseFloat(enderecosFinal.data[0].latitude),
@@ -236,7 +220,8 @@ export default function LocalDescarte() {
                 rua: `Endereço: ${enderecosFinal.data[0].rua}, número ${enderecosFinal.data[0].numero}`,
                 bairro: `Bairro: ${enderecosFinal.data[0].bairro}`,
                 telefone: `Telefone: ${cliente.data[0].telefone}`,
-                email: `E-mail: ${cliente.data[0].email}`
+                email: `E-mail: ${cliente.data[0].email}`,
+                distancia: `Distância ao Cliente: ${distancia} KM`
               };
 
               if(index == 0){
@@ -246,8 +231,9 @@ export default function LocalDescarte() {
               }
               
               // positionsMap.push(dadosRetorno);
-
-              positionsMapConsultaAtual.push(dadosRetorno);
+              if(pertenceRaioDistancia){
+                positionsMapConsultaAtual.push(dadosRetorno);
+              }
                 
 
               return await dadosRetorno;
@@ -255,26 +241,18 @@ export default function LocalDescarte() {
             
           });
 
-          console.log("retornaDadosColeta: ", retornaDadosColeta);
-
         }
 
         await getDadosPontosColeta();
 
-        console.log("positionsMapConsultaAtual_final: ", positionsMapConsultaAtual);
-
         setPositionsMap(positionsMapConsultaAtual);
 
-        console.log("positionsMapMedio: ", positionsMap);
-        
         setPosition(null);
         setCenter([-12, -38]);
         setAtivado(true);
 
         setLoadMapa(true);
         
-        console.log("positionsMapFinal: ", positionsMap); 
-
       } catch (error) {
           console.log("error: ", error);
       } 
@@ -387,7 +365,7 @@ export default function LocalDescarte() {
                         position={[positionMap.latitude, positionMap.longitude]}
                       >
                         <Popup>
-                          
+
                           {positionMap.nome}
                           <br />
                           {positionMap.rua}
@@ -397,6 +375,8 @@ export default function LocalDescarte() {
                           {positionMap.telefone}
                           <br />
                           {positionMap.email}
+                          <br />
+                          {positionMap.distancia}
                           
                         </Popup>  
                       </Marker>)
