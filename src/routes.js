@@ -8,6 +8,7 @@ import Cadastro_Empresa_Coleta from "./pages/Cadastro_Empresa_Coleta";
 import Cadastro from "./pages/Cadastro";
 import Area_Cliente from "./pages/Area_Cliente"
 import Local_Descarte from "./pages/Local_Descarte"
+import Lixo_eletronico from "./pages/Lixo_Eletronico"
 
 export default function Routes() {
   return (
@@ -20,6 +21,7 @@ export default function Routes() {
         <Route exact path="/cadastro" component={Cadastro} />
         <Route exact path="/area_cliente" component={Area_Cliente} />
         <Route exact path="/local_descarte" component={Local_Descarte} />
+        <Route exact path="/lixo_eletronico" component={Lixo_eletronico} />
         <Route path="*" component={() => <h1>Page not found</h1>} />
       </Switch>
     </BrowserRouter>

@@ -2,7 +2,6 @@ import React, {useEffect, useState} from 'react';
 import AppBar from '@material-ui/core/AppBar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import Grid from '@material-ui/core/Grid';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
@@ -14,20 +13,24 @@ import Link from "@material-ui/core/Link";
 
 import api from "../../services/api";
 import { getLogin } from "../../services/auth";
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents, Tooltip } from 'react-leaflet';
 import { Icon } from "leaflet";
+import Leaflet from "leaflet";
 import '../../App.css';
 import { 
   toLatLon, distanceTo, insideCircle, insidePolygon 
-} from 'geolocation-utils'
+} from 'geolocation-utils';
+
+import Snackbar from '@material-ui/core/Snackbar';
+import MuiAlert from '@material-ui/lab/Alert';
 
 /* ícones */
 import AssignmentInd from '@material-ui/icons/AssignmentInd';
-import Github from '@material-ui/icons/GitHub';
-import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 /*Images*/
-import ReciclageImage from '../../assets/images/reciclar.jpg';
 import SendIcon from '@material-ui/icons/Send';
+import AssignmentIndOutlinedIcon from '@material-ui/icons/AssignmentIndOutlined';
+import mapPin from "../../assets/images/house.svg";
+import mapPin3 from "../../assets/images/map-marker.svg";
 
 /* Import para os checkbox*/
 import Checkbox from '@material-ui/core/Checkbox';
@@ -38,6 +41,25 @@ import CheckBoxIcon from '@material-ui/icons/CheckBox';
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
+
+const mapPinIcon = Leaflet.icon({
+  iconUrl: mapPin,
+  iconSize: [38, 48],
+  iconAnchor: [29, 68],
+  popupAnchor: [170, 2],
+});
+
+const mapPinIcon3 = Leaflet.icon({
+  iconUrl: mapPin3,
+  iconSize: [48, 58],
+  iconAnchor: [29, 68],
+  popupAnchor: [170, 2],
+});
+
+
+function Alert(props) {
+  return <MuiAlert elevation={6} variant="filled" {...props} />;
+};
 
 
 const useStyles = makeStyles((theme) => ({  
@@ -90,8 +112,15 @@ const useStyles = makeStyles((theme) => ({
 
   typhographDiv: {
     backgroundColor: 'rgba(38, 33, 29, 0.1)', 
-    height: '100vh',  //84vh
-  }
+    height: '110vh',  //84vh
+  },
+
+  submit: {
+    margin: theme.spacing(3, 0, 2),
+    marginLeft: theme.spacing(5),
+    marginRight: theme.spacing(5),
+    width: "85%",
+  },
 
 }));
 
@@ -106,6 +135,14 @@ export default function LocalDescarte() {
   const [valorSelecao, setValorSelecao] = useState(null);
   const [loadMapa, setLoadMapa] = useState(false);
   const [zoom, setZoom] = useState(15);
+  const [raio, setRaio] = useState(10000); //metros
+  const [botaoDesabilitado, setBotaoDesabilitado] = useState(true);
+  const [open, setOpen] = useState(false);
+  const [severityMessage, setSeverityMessage] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+  const [empresaEscolhida, setEmpresaEscolhida] = useState("");
+  const [focusLabel, setFocusLabel] = useState(true);
+  const [mapIcon, setMapIcon] = useState(mapPinIcon3);
   
 
   useEffect( () => {
@@ -126,7 +163,9 @@ export default function LocalDescarte() {
                 bairro: `Bairro: ${responseEndereco.data[0].bairro}`,
                 telefone: `Telefone: ${responseCliente.data[0].telefone}`,
                 email: `E-mail: ${responseCliente.data[0].email}`,
-                distancia: `Local do Cliente`
+                distancia: `Local do Cliente`,
+                id_cliente: responseCliente.data[0].id,
+                icon: mapPinIcon3
               }]);  
             }else{
               setZoom(13);
@@ -177,6 +216,8 @@ export default function LocalDescarte() {
       }
     }
   }, [positionsMap, loadMapa]);
+
+
   
   const handleClickButton = async (e) => {
 
@@ -184,12 +225,12 @@ export default function LocalDescarte() {
       
       try {
 
+        setBotaoDesabilitado(false);
+
         let positionsMapConsultaAtual = [];
         positionsMapConsultaAtual.push(positionsMap[0]);
 
         const positionCliente = toLatLon([positionsMapConsultaAtual[0].longitude, positionsMapConsultaAtual[0].latitude]);
-        
-        const raio = 10000; // metros
 
         const requestePontosMaterial = await api.get(`/ponto_material_reciclado/${valorSelecao.id}`);                    
         const pontosMaterial = requestePontosMaterial.data;
@@ -208,7 +249,7 @@ export default function LocalDescarte() {
               let positionEmpresa = toLatLon([parseFloat(enderecosFinal.data[0].longitude), parseFloat(enderecosFinal.data[0].latitude)]);
 
               let distancia = (distanceTo(positionCliente, positionEmpresa) / 1000); //distância em quilômetros
-              distancia = parseFloat(distancia.toFixed(2));
+              distancia = parseFloat(distancia.toFixed(3));
 
               let pertenceRaioDistancia = insideCircle(positionEmpresa, positionCliente, raio); //a ideia eh verificar se uma empresa está em um raio de distância do cliente
               
@@ -221,10 +262,12 @@ export default function LocalDescarte() {
                 bairro: `Bairro: ${enderecosFinal.data[0].bairro}`,
                 telefone: `Telefone: ${cliente.data[0].telefone}`,
                 email: `E-mail: ${cliente.data[0].email}`,
-                distancia: `Distância ao Cliente: ${distancia} KM`
+                distancia: `Distância ao Cliente: ${distancia} KM`,
+                id_cliente: cliente.data[0].id,
+                icon: mapPinIcon
               };
 
-              if(index == 0){
+              if(index === 0){
                 for (var i = 0; i < positionsMap.length - 1; i++) {
                   positionsMap.pop();
                 }
@@ -260,7 +303,83 @@ export default function LocalDescarte() {
     }
 
   };
-   
+
+  const handleClickButtonSalvar = async (e) => {
+
+    if(valorSelecao){
+
+      try {
+        const idClientePesquisa = positionsMap[0].id_cliente;
+        const nomeClientePesquisa = positionsMap[0].nome;
+
+        var data = new Date();
+        var dia     = data.getDate();
+        var mes     = data.getMonth();
+        var ano4    = data.getFullYear();
+        var str_data = dia + '/' + (mes+1) + '/' + ano4;
+
+        const descartes = [];
+        let positionClienteInicial = [];
+
+        positionsMap.forEach((position, index) => {
+
+          if(index > 0){
+            const dadosRetorno = {
+              descricao: `O  cliente ${nomeClientePesquisa} pesquisou na data ${str_data} 
+                          pelo produto ${valorSelecao.descricao}, sendo este um dos produtos do seu 
+                          portifólio empresa ${position.nome} `,
+              id_cliente: idClientePesquisa,
+              id_ponto_coleta: position.id_cliente
+            }
+            descartes.push(dadosRetorno);
+          }else{
+            positionClienteInicial.push(position);
+          }
+          
+        });
+
+        const response = await api.post("/descarte_em_massa", descartes);
+        
+        setSeverityMessage("success");
+        setAlertMessage("Pesquisa Salva com Sucesso!");
+        setOpen(true);
+
+        setTimeout(() => {
+          setPositionsMap(positionClienteInicial);
+
+          setPosition(null);
+          setCenter([-12, -38]);
+          setValorSelecao(null);
+          setBotaoDesabilitado(true);
+          setAtivado(true);
+
+          setLoadMapa(true);  
+        }, 3000);
+
+      } catch (error) {
+      
+        setSeverityMessage("error");
+        setAlertMessage(`Erro ao salvar pesquisa: ${error}!!`);
+        setOpen(true);
+
+      }
+
+    }else{
+      setBotaoDesabilitado(true);
+      setSeverityMessage("error");
+      setAlertMessage("Erro ao salvar pesquisa, informação do material reciclável não pode estar vazia!!")
+      setOpen(true);  
+    }
+
+  };
+  
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setOpen(false);
+  };
 
   return (
     <React.Fragment>
@@ -269,23 +388,10 @@ export default function LocalDescarte() {
         <AppBar position="relative">
           <Toolbar>
             <AssignmentInd className={classes.icon} />
-            <Typography variant="h6" color="inherit" className={classes.title} noWrap>
-              EDescarte
-            </Typography>
-            <Link  color="inherit" href="/lixo_eletronico" >
-              <Typography variant="h6" color="inherit" className={classes.title} >
-                Lixo Eletrônico
-              </Typography>  
-            </Link>
-            <Link  color="inherit" href="/local_descarte" >
-              <Typography variant="h6" color="inherit" className={classes.title} >
-                Locais de Descarte
-              </Typography>  
-            </Link>
-            <Link  color="inherit" href="/" >
-              <Typography variant="h6" color="inherit" className={classes.title} >
-                Logout
-              </Typography>  
+            <Link  color="inherit" href="/area_cliente" >
+              <Typography variant="h6" color="inherit" className={classes.title} noWrap>
+                EDescarte - Área Cliente
+              </Typography>
             </Link>
           </Toolbar>
         </AppBar>
@@ -306,6 +412,7 @@ export default function LocalDescarte() {
                   setValorSelecao(newValue);
                 }}
                 multiple={false}
+                autoFocus={focusLabel}
                 id="checkboxes-tags-demo"
                 options={listaMaterialReciclado}
                 disableCloseOnSelect={false}
@@ -321,7 +428,7 @@ export default function LocalDescarte() {
                     {option.descricao}
                   </React.Fragment>
                 )}
-                // style={{ width: 500 }}
+                
                 renderInput={(params) => (
                   <TextField {...params} fullWidth variant="outlined" label="Lista de Materiais Recicláveis" placeholder="Escolha qual materia deseja descartar:" />
                 )}               
@@ -342,16 +449,13 @@ export default function LocalDescarte() {
             </div>
 
 
-            {/* <div class = "leaflet-container"> */}
             {position && (
                 <MapContainer 
                     class="leaflet-container" 
                     center={center} 
                     zoom={zoom} 
-                    // zoom={15} 
                     scrollWheelZoom={true} 
                     className={classes.mapa}
-                    // style={{ width: '50%', height: '50vh' }}
                     > 
 
                     <TileLayer 
@@ -363,6 +467,9 @@ export default function LocalDescarte() {
                       positionMap && (<Marker
                         key={positionMap.index}
                         position={[positionMap.latitude, positionMap.longitude]}
+                       
+                        icon={positionMap.icon}
+                         
                       >
                         <Popup>
 
@@ -378,18 +485,38 @@ export default function LocalDescarte() {
                           <br />
                           {positionMap.distancia}
                           
-                        </Popup>  
+                        </Popup> 
+
+                          {(index === 0) && (
+                            <Tooltip>Clique no ícone para obter suas informações pessoais</Tooltip>
+                          )} 
+
+                          {(index > 0) && (
+                            <Tooltip>Empresa {positionMap.nome} - clique para obter mais dados</Tooltip>
+                          )}
+                       
                       </Marker>)
 
                     ))}
-                    {/* <Marker position={position} >
-                      <Popup>
-                          A pretty CSS3 popup. <br /> Easily customizable.
-                      </Popup>
-                    </Marker> */}
+                    
                 </MapContainer>
             )}
-            {/* </div> */}
+            
+            <Button
+              // fullWidth
+              variant="contained"
+              color="primary"
+              disabled={botaoDesabilitado}
+              className={classes.submit}
+              onClick={handleClickButtonSalvar}
+            >
+              <AssignmentIndOutlinedIcon /> Salvar Pesquisa
+            </Button>
+            <Snackbar open={open} autoHideDuration={3000} onClose={handleClose}>
+              <Alert onClose={handleClose} severity={severityMessage}>
+                 {alertMessage}
+              </Alert>
+            </Snackbar>
 
           </Typography>
           </Container>

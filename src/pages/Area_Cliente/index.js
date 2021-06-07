@@ -44,6 +44,7 @@ const useStyles = makeStyles((theme) => ({
     flexGrow: 1,
     marginRight: theme.spacing(2),
   },
+  
 
 }));
 
@@ -64,7 +65,7 @@ export default function Album() {
           <Toolbar>
             <AssignmentInd className={classes.icon} />
             <Typography variant="h6" color="inherit" className={classes.title} noWrap>
-              EDescarte
+              EDescarte - Área Cliente
             </Typography>
             <Link  color="inherit" href="/lixo_eletronico" >
               <Typography variant="h6" color="inherit" className={classes.title} >
