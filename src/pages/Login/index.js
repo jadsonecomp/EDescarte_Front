@@ -143,7 +143,21 @@ export default function Login() {
         setSeverityMessage("success");
         setAlertMessage("Login Realizado com Sucesso!")
         setOpen(true);
-        history.push("/area_cliente");
+
+        const responseCliente = await api.get(`/cliente_login/${login}`); 
+        console.log('responseCliente: ', responseCliente);
+
+        if(responseCliente.data.length > 0){
+          const responsePontoColeta = await api.get(`/ponto_coleta_cliente/${responseCliente.data[0].id}`);
+          console.log('responsePontoColeta.data.length: ', responsePontoColeta.data.length);
+          if(responsePontoColeta.data.length > 0){
+            history.push("/area_empresa");
+          }else{
+            history.push("/area_cliente");
+          }
+        }
+
+        // history.push("/area_cliente");
     } catch (err) {
         setError(true);
         setHelperText("O usuário ou a senha informados são inválidos!");

@@ -1,4 +1,5 @@
 import React, {useEffect} from 'react';
+import { useHistory } from "react-router-dom";
 import AppBar from '@material-ui/core/AppBar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -11,13 +12,20 @@ import Paper from '@material-ui/core/Paper';
 import Copyright from '../../components/Copyright';
 
 import Link from "@material-ui/core/Link";
+import MenuItem from '@material-ui/core/MenuItem';
+import Menu from '@material-ui/core/Menu';
+
+import { getLogin } from "../../services/auth";
 
 /* ícones */
 import AssignmentInd from '@material-ui/icons/AssignmentInd';
 import Github from '@material-ui/icons/GitHub';
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
+import AccountCircle from '@material-ui/icons/AccountCircle';
+import IconButton from '@material-ui/core/IconButton';
 /*Images*/
-import ReciclageImage from '../../assets/images/reciclar.jpg'
+import ReciclageImage from '../../assets/images/reciclar.jpg';
+import ReciclageImage2 from '../../assets/images/como-ganhar-dinheiro-com-reciclagem-1.jpg';
 
 
 const useStyles = makeStyles((theme) => ({  
@@ -26,9 +34,9 @@ const useStyles = makeStyles((theme) => ({
   },  
   fundoInicial: {
     position: 'relative',    
-    color: theme.palette.common.black,
+    color: theme.palette.common.white,
     marginBottom: theme.spacing(0),
-    backgroundImage: `url(${ReciclageImage})`,//'url(https://picsum.photos/800)', /* imagem randômica */
+    backgroundImage: `url(${ReciclageImage2})`,//'url(https://picsum.photos/800)', /* imagem randômica */
     backgroundSize: 'cover',
     backgroundRepeat: 'no-repeat',
     backgroundPosition: 'center',
@@ -44,18 +52,48 @@ const useStyles = makeStyles((theme) => ({
     flexGrow: 1,
     marginRight: theme.spacing(2),
   },
+  title2: {
+    flexGrow: 1,
+    marginRight: theme.spacing(0),
+    marginLeft: theme.spacing(2),
+  },
+  menuItem: {
+    backgroundColor: theme.palette.primary,
+  },
+  divForm: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+  },
   
 
 }));
 
 export default function Album() {
+  const history = useHistory();
   const classes = useStyles();
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open = Boolean(anchorEl);
 
   useEffect(() => {
     document.title = 'Exemplo React - Página Inicial';
    }, []);
   
+   const handleMenu = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
 
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+  const handleCloseMinhaConta = () => {
+    setAnchorEl(null);
+    history.push("/atualiza_cliente");
+  };
+  const handleCloseSair = () => {
+    setAnchorEl(null);
+    history.push("/");
+  };
 
   return (
     <React.Fragment>
@@ -77,23 +115,70 @@ export default function Album() {
                 Locais de Descarte
               </Typography>  
             </Link>
+            {/* <Link  color="inherit" href="/atualiza_cliente" >
+              <Typography variant="h6" color="inherit" className={classes.title} >
+                Atualizar Dados
+              </Typography>  
+            </Link>
             <Link  color="inherit" href="/" >
               <Typography variant="h6" color="inherit" className={classes.title} >
                 Logout
               </Typography>  
-            </Link>
+            </Link> */}
+
+
+            <div className={classes.divForm}>
+
+              <Typography onClick={handleMenu} variant="h6" color="inherit" className={classes.title2} >
+                Olá, {getLogin()}
+              </Typography>
+
+              <IconButton
+                aria-label="account of current user"
+                aria-controls="menu-appbar"
+                aria-haspopup="true"
+                onClick={handleMenu}
+                color="inherit"
+              >
+                <AccountCircle />
+              </IconButton>
+              
+              <Menu
+                id="menu-appbar"
+                anchorEl={anchorEl}
+                anchorOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                open={open}
+                onClose={handleClose}
+                className={classes.menuItem}
+                color="inherit"
+              >
+                <MenuItem onClick={handleCloseMinhaConta}>Minha conta</MenuItem>
+                <MenuItem onClick={handleCloseSair}>Sair</MenuItem>
+              </Menu>
+            </div>
+
+
+
           </Toolbar>
         </AppBar>
       </div>  
       <main>                
         <Paper className={classes.fundoInicial} >
           <Container>
-          <Typography component="div" style={{ backgroundColor: 'rgba(38, 33, 29, 0.1)', height: '84vh' }}>    
+          <Typography component="div" style={{ backgroundColor: 'rgba(35, 72, 32, 0.3)', height: '84vh' }}>    
             <Typography component="h1" variant="h2" align="center" gutterBottom>
               EDescarte
             </Typography>
             <Typography variant="h5" align="center" paragraph>
-              Seja bem-vindo ao nosso Portal. Aqui é possível obter informações relevantes acerda do lixo eletrônico e principalmente localizar os pontos de coleta mais próximos a você, acesse a nossa barra de menu e descubra mais sobre nosso Portal.
+              Seja bem-vindo ao nosso Portal. Aqui é possível obter informações relevantes acerca do lixo eletrônico e principalmente localizar os pontos de coleta mais próximos a você, acesse a nossa barra de menu e descubra mais sobre nosso Portal.
             </Typography>                        
           </Typography>
           </Container>

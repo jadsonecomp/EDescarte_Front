@@ -45,15 +45,15 @@ const checkedIcon = <CheckBoxIcon fontSize="small" />;
 const mapPinIcon = Leaflet.icon({
   iconUrl: mapPin,
   iconSize: [38, 48],
-  iconAnchor: [29, 68],
-  popupAnchor: [170, 2],
+  // iconAnchor: [29, 68],
+  // popupAnchor: [170, 2],
 });
 
 const mapPinIcon3 = Leaflet.icon({
   iconUrl: mapPin3,
   iconSize: [48, 58],
-  iconAnchor: [29, 68],
-  popupAnchor: [170, 2],
+  // iconAnchor: [29, 68],
+  // popupAnchor: [170, 2],
 });
 
 
@@ -325,8 +325,8 @@ export default function LocalDescarte() {
 
           if(index > 0){
             const dadosRetorno = {
-              descricao: `O  cliente ${nomeClientePesquisa} pesquisou na data ${str_data} 
-                          pelo produto ${valorSelecao.descricao}, sendo este um dos produtos do seu 
+              descricao: `O  cliente ${nomeClientePesquisa} pesquisou na data +${str_data}+ 
+                          pelo produto *${valorSelecao.descricao}*, sendo este um dos produtos do seu 
                           portifólio empresa ${position.nome} `,
               id_cliente: idClientePesquisa,
               id_ponto_coleta: position.id_cliente

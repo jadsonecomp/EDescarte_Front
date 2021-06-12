@@ -21,6 +21,8 @@ import FormHelperText from '@material-ui/core/FormHelperText';
 import Snackbar from '@material-ui/core/Snackbar';
 import MuiAlert from '@material-ui/lab/Alert';
 
+import { getLogin, getToken } from "../../services/auth";
+
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import AssignmentIcon from '@material-ui/icons/Assignment';
 import PhoneIcon from '@material-ui/icons/Phone';
@@ -125,6 +127,9 @@ export default function Cadastro_Cliente() {
   const [open, setOpen] = useState(false);
   const [severityMessage, setSeverityMessage] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
+  const [idClienteOrigin, setIdClienteOrigin] = useState("");
+  const [idEnderecoOrigin, setIdEnderecoOrigin] = useState("");
+  const [idPontoColetaOrigin, setIdPontoColetaOrigin] = useState("");
 
 
   useEffect(() => {
@@ -144,31 +149,72 @@ export default function Cadastro_Cliente() {
   // Nota: O array [] deps vazio significa
   // que este useEffect será executado uma vez
   // semelhante ao componentDidMount()
-  useEffect(() => {    
-      document.title = 'Exemplo React - Área Reservada';     
+  useEffect(async () => {    
+      document.title = 'Exemplo React - Área Reservada'; 
+      
+
+      try {
+
+        
+        const responseCliente = await api.get(`/cliente_login/${getLogin()}`);
+        const responsePontoColeta = await api.get(`/ponto_coleta_cliente/${responseCliente.data[0].id}`);         
+        const responseEndereco = await api.get(`/endereco_cliente/${responseCliente.data[0].id}`);
+
+        setIdClienteOrigin(responseCliente.data[0].id);
+        setIdEnderecoOrigin(responseEndereco.data[0].id);
+        setIdPontoColetaOrigin(responsePontoColeta.data[0].id);
+
+        setNome(responseCliente.data[0].nome);
+        setNomeFantasia(responsePontoColeta.data[0].nome_fantasia);
+        setDocumento(responseCliente.data[0].documento);
+        setTelefone(responseCliente.data[0].telefone);
+        setCelular(responseCliente.data[0].celular);
+        setEmail(responseCliente.data[0].email);
+        setLogin(responseCliente.data[0].login);
+
+
+        setCep(responseEndereco.data[0].cep);
+        setPais(responseEndereco.data[0].pais);
+        setEstado(responseEndereco.data[0].estado);
+        setCidade(responseEndereco.data[0].cidade);
+        setBairro(responseEndereco.data[0].bairro);
+        setRua(responseEndereco.data[0].rua);
+        setNumero(responseEndereco.data[0].numero);
+        
+
+    
+    } catch (error) {
+        
+        console.log("Erro ao carregar informações iniciais, ", error);
+
+    }
+
+
+      
   }, []);
 
   
   const validaCadastro = async e => {
     e.preventDefault();
     try {
-        const response = await api.post("/cliente", { nome, documento, telefone, celular, email, login, senha });
+        const response = await api.patch(`/cliente/${idClienteOrigin}`, { nome, documento, telefone, celular, email, login, senha });
         const id_cliente = response.data.id;
         
         try {
-            const responseEmpresa = await api.post("/ponto_coleta", { nome_fantasia, id_cliente})
-            const responseEnd = await api.post("/endereco", { pais, estado, cidade, bairro, rua, numero, cep, id_cliente });
-            loginUsuario("", login);
+            
+            const responseEmpresa = await api.patch(`/ponto_coleta/${idPontoColetaOrigin}`, { nome_fantasia})
+            const responseEnd = await api.patch(`/endereco/${idEnderecoOrigin}`, { pais, estado, cidade, bairro, rua, numero, cep });
+            loginUsuario(getToken(), login);
 
             setError(false);
-            setHelperText("Cadastro Realizado com Sucesso! Aguarde...");
+            setHelperText("Cadastro Atualizado com Sucesso! Aguarde...");
             setTimeout(function(){ setHelperText(""); }, 2000);
 
             setSeverityMessage("success");
-            setAlertMessage("Cadastro Realizado com Sucesso!")
+            setAlertMessage("Cadastro Atualizado com Sucesso!")
             setOpen(true);
 
-            setTimeout(function(){ history.push("/login"); }, 3000);
+            setTimeout(function(){ history.push("/area_empresa"); }, 3000);
             
         } catch (erro) {
             setError(true);
@@ -177,7 +223,7 @@ export default function Cadastro_Cliente() {
             const responseEnd = await api.delete(`/cliente/${id_cliente}`);
 
             setSeverityMessage("error");
-            setAlertMessage("Erro ao realizar cadastro, revisar os dados informados!!")
+            setAlertMessage("Erro ao atualizar cadastro, revisar os dados informados!!")
             setOpen(true);
         }
 
@@ -188,7 +234,7 @@ export default function Cadastro_Cliente() {
         setTimeout(function(){ setHelperText(""); }, 2000);
 
         setSeverityMessage("error");
-        setAlertMessage("Erro ao realizar cadastro, revisar os dados informados!!")
+        setAlertMessage("Erro ao atualizar cadastro, revisar os dados informados!!")
         setOpen(true);
     }
 
@@ -313,7 +359,7 @@ export default function Cadastro_Cliente() {
                     </div>
 
                     <div className={classes.divForm}>  
-                        <TextField
+                        <TextField 
                             className={classes.rowEspace}
                             variant="outlined"
                             margin="normal"
@@ -381,7 +427,6 @@ export default function Cadastro_Cliente() {
                             }}
                         />
                         <TextField
-                            className={classes.rowEspace}
                             variant="outlined"
                             margin="normal"
                             required
@@ -426,7 +471,6 @@ export default function Cadastro_Cliente() {
                             }}
                         />
                         <TextField
-                            className={classes.rowEspace}
                             variant="outlined"
                             margin="normal"
                             required
@@ -630,7 +674,7 @@ export default function Cadastro_Cliente() {
                         disabled={botaoDesabilitado}
                         className={classes.submit}
                     >
-                        <AssignmentIndOutlinedIcon /> Cadastrar
+                        <AssignmentIndOutlinedIcon /> Atualizar
                     </Button>
                     <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
                         <Alert onClose={handleClose} severity={severityMessage}>
