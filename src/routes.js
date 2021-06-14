@@ -14,6 +14,7 @@ import Area_Empresa from "./pages/Area_Empresa"
 import Associar_Produtos from "./pages/Associar_Produtos"
 import Campanhas_Coleta from "./pages/Campanhas_Coleta"
 import Consultar_Descartes from "./pages/Consultar_Descartes"
+import Campanhas_Ativas from "./pages/Campanhas_Ativas"
 import Atualiza_Empresa from "./pages/Atualiza_Empresa"
 
 export default function Routes() {
@@ -33,6 +34,7 @@ export default function Routes() {
         <Route exact path="/associar_produtos" component={Associar_Produtos} />
         <Route exact path="/campanhas_coleta" component={Campanhas_Coleta} />
         <Route exact path="/consultar_descartes" component={Consultar_Descartes} />
+        <Route exact path="/campanhas_ativas" component={Campanhas_Ativas} />
         <Route exact path="/atualiza_empresa" component={Atualiza_Empresa} />
         <Route path="*" component={() => <h1>Page not found</h1>} />
       </Switch>

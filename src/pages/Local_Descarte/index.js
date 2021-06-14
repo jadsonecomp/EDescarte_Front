@@ -24,6 +24,10 @@ import {
 import Snackbar from '@material-ui/core/Snackbar';
 import MuiAlert from '@material-ui/lab/Alert';
 
+import Avatar from "@material-ui/core/Avatar";
+import SaveAltOutlinedIcon from '@material-ui/icons/SaveAltOutlined';
+
+
 /* ícones */
 import AssignmentInd from '@material-ui/icons/AssignmentInd';
 /*Images*/
@@ -122,6 +126,21 @@ const useStyles = makeStyles((theme) => ({
     width: "85%",
   },
 
+  // avatar: {
+  //   margin: theme.spacing(1),
+  //   backgroundColor: theme.palette.secondary.main
+  // },
+
+  // cadastroLogin: {
+  //   marginTop: theme.spacing(8),
+  //   display: "flex",
+  //   flexDirection: "column",
+  //   alignItems: "center",
+  //   backgroundColor: theme.palette.primary.main,
+  //   marginLeft: theme.spacing(5),
+  //   width: "92%"
+  // },
+
 }));
 
 
@@ -161,10 +180,14 @@ export default function LocalDescarte() {
                 nome: `${responseCliente.data[0].nome}`,
                 rua: `Endereço: ${responseEndereco.data[0].rua}, número ${responseEndereco.data[0].numero}`,
                 bairro: `Bairro: ${responseEndereco.data[0].bairro}`,
+                endereco: `Endereço: ${responseEndereco.data[0].rua}, número ${responseEndereco.data[0].numero}, bairro ${responseEndereco.data[0].bairro}, ${responseEndereco.data[0].cidade}, ${responseEndereco.data[0].estado}`,
                 telefone: `Telefone: ${responseCliente.data[0].telefone}`,
                 email: `E-mail: ${responseCliente.data[0].email}`,
+                contato: `Telefone: ${responseCliente.data[0].telefone}
+                          E-mail: ${responseCliente.data[0].email}`,
                 distancia: `Local do Cliente`,
                 id_cliente: responseCliente.data[0].id,
+                id_ponto_coleta: '',
                 icon: mapPinIcon3
               }]);  
             }else{
@@ -260,10 +283,14 @@ export default function LocalDescarte() {
                 nome: `${pontoColeta.data[0].nome_fantasia}`,
                 rua: `Endereço: ${enderecosFinal.data[0].rua}, número ${enderecosFinal.data[0].numero}`,
                 bairro: `Bairro: ${enderecosFinal.data[0].bairro}`,
+                endereco: `Endereço: ${enderecosFinal.data[0].rua}, número ${enderecosFinal.data[0].numero}, bairro ${enderecosFinal.data[0].bairro}, ${enderecosFinal.data[0].cidade}, ${enderecosFinal.data[0].estado}`,
                 telefone: `Telefone: ${cliente.data[0].telefone}`,
                 email: `E-mail: ${cliente.data[0].email}`,
+                contato: `Telefone: ${cliente.data[0].telefone}
+                          E-mail: ${cliente.data[0].email}`,
                 distancia: `Distância ao Cliente: ${distancia} KM`,
                 id_cliente: cliente.data[0].id,
+                id_ponto_coleta: pontoColeta.data[0].id, 
                 icon: mapPinIcon
               };
 
@@ -311,6 +338,8 @@ export default function LocalDescarte() {
       try {
         const idClientePesquisa = positionsMap[0].id_cliente;
         const nomeClientePesquisa = positionsMap[0].nome;
+        const enderecoClientePesquisa = positionsMap[0].endereco;
+        const contatoClientePesquisa = positionsMap[0].contato;
 
         var data = new Date();
         var dia     = data.getDate();
@@ -325,11 +354,11 @@ export default function LocalDescarte() {
 
           if(index > 0){
             const dadosRetorno = {
-              descricao: `O  cliente ${nomeClientePesquisa} pesquisou na data +${str_data}+ 
+              descricao: `O  cliente -${nomeClientePesquisa}-, !${enderecoClientePesquisa}!, %${contatoClientePesquisa}% pesquisou na data +${str_data}+ 
                           pelo produto *${valorSelecao.descricao}*, sendo este um dos produtos do seu 
                           portifólio empresa ${position.nome} `,
               id_cliente: idClientePesquisa,
-              id_ponto_coleta: position.id_cliente
+              id_ponto_coleta: position.id_ponto_coleta
             }
             descartes.push(dadosRetorno);
           }else{
@@ -400,6 +429,18 @@ export default function LocalDescarte() {
         <Paper className={classes.fundoInicial} >
           <Container>
           <Typography component="div" className={classes.typhographDiv} >    
+
+            {/* <div className={classes.cadastroLogin}>
+
+              <Avatar className={classes.avatar}>
+                  <SaveAltOutlinedIcon />
+              </Avatar>
+              <Typography component="h1" variant="h5" align="center">
+                  Consultar Locais de Descarte
+              </Typography> 
+
+            </div> */}
+
             <Typography component="h1" variant="h2" align="center" gutterBottom>
               EDescarte
             </Typography>

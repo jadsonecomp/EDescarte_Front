@@ -284,8 +284,8 @@ export default function LocalDescarte() {
       <CssBaseline />
       
       <div className={classes.root}>
-        {((listaMaterialReciclado) && (listaMaterialReciclado.length > 0) && 
-          (listaMaterialInicial) ) && (    
+        {/* {((listaMaterialReciclado) && (listaMaterialReciclado.length > 0) && 
+          (listaMaterialInicial) ) && (     */}
         <AppBar position="relative">
           <Toolbar>
             <AssignmentInd className={classes.icon} />
@@ -296,11 +296,11 @@ export default function LocalDescarte() {
             </Link>
           </Toolbar>
         </AppBar>
-        )}
+        {/* )} */}
       </div>  
       <main>   
-        {((listaMaterialReciclado) && (listaMaterialReciclado.length > 0) && 
-          (listaMaterialInicial) ) && (             
+        {/* {((listaMaterialReciclado) && (listaMaterialReciclado.length > 0) && 
+          (listaMaterialInicial) ) && (              */}
         <Paper className={classes.fundoInicial} >
           <Container>
           <Typography component="div" className={classes.typhographDiv} > 
@@ -361,7 +361,6 @@ export default function LocalDescarte() {
                   // value={valorSelecao}
                   onChange={(event, newValue) => {
                     setValorSelecao(newValue);
-                    console.log("newValue: ", newValue);
                     if(newValue.length > 0){
                       setBotaoDesabilitado(false);  
                     }else{
@@ -421,13 +420,13 @@ export default function LocalDescarte() {
           </Typography>
           </Container>
         </Paper>  
-        )}      
+        {/* )}       */}
       </main>
 
-      {((listaMaterialReciclado) && (listaMaterialReciclado.length > 0) && 
-                (listaMaterialInicial) ) && (     
+      {/* {((listaMaterialReciclado) && (listaMaterialReciclado.length > 0) && 
+                (listaMaterialInicial) ) && (      */}
         <Copyright />
-      )} 
+      {/* )}  */}
       
     </React.Fragment>  
     

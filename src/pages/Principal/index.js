@@ -63,6 +63,11 @@ export default function Album() {
             <Typography variant="h6" color="inherit" className={classes.title} noWrap>
               EDescarte
             </Typography>
+            <Link  color="inherit" href="/campanhas_ativas" >
+              <Typography variant="h6" color="inherit" className={classes.title} >
+                Campanhas de Coleta
+              </Typography>  
+            </Link>
             <Link  color="inherit" href="/login" >
               <Typography variant="h6" color="inherit" className={classes.title} >
                 Login

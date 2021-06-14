@@ -112,7 +112,7 @@ export default function Album() {
             </Link>
             <Link  color="inherit" href="/consultar_descartes" >
               <Typography variant="h6" color="inherit" className={classes.title} >
-                Consultar Descartes
+                Consultar Pesquisas
               </Typography>  
             </Link>
             <Link  color="inherit" href="/campanhas_coleta" >
@@ -183,7 +183,7 @@ export default function Album() {
               EDescarte
             </Typography>
             <Typography variant="h5" align="center" paragraph>
-              Seja bem-vindo ao nosso Portal. Aqui é possível obter informações relevantes acerca do lixo eletrônico e principalmente localizar os pontos de coleta mais próximos a você, acesse a nossa barra de menu e descubra mais sobre nosso Portal.
+              Seja bem-vindo ao nosso Portal. Aqui é possível associar os produtos eletrônicos que sua empresa faz o recolhimento, consultar se usuários fizeram pesquisas de materiais recicláveis vinculados a sua empresa, além de poder cadastrar campanhas de coleta e assim informar aos usuários onde os materias da campanha podem ser recolhidos, acesse a nossa barra de menu e descubra mais sobre nosso Portal.
             </Typography>                        
           </Typography>
           </Container>
